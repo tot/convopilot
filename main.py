@@ -1,4 +1,5 @@
 import os
+import time
 from mcts import mcts_search, ConversationState
 from dotenv import load_dotenv
 from google import genai
@@ -23,38 +24,74 @@ test_prompt = system_prompt + generate_context_prompt(context=user_context) + ge
 
 print(test_prompt)
 
-def generate_variants(message: str):
+def is_too_similar(variant: str, original: str, threshold: float = 0.8):
     """
-    Generate exactly 1 message.
+    Check if a variant is too similar to the original message.
     
     Args:
-        message (str): The message to generate variants for
+        variant (str): The variant message
+        original (str): The original message
+        threshold (float): Similarity threshold (0-1)
         
     Returns:
-        list: List of exactly 1 message variant1
+        bool: True if the messages are too similar
     """
-    prompt = "Generate exactly 1 optimized message based on these requirements: " + test_prompt
+    variant_lower = variant.lower()
+    original_lower = original.lower()
     
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt
-        )
+    variant_words = set(variant_lower.split())
+    original_words = set(original_lower.split())
+    
+    if not original_words:
+        return False
+    
+    intersection = len(variant_words.intersection(original_words))
+    union = len(variant_words.union(original_words))
+    
+    if union == 0:
+        return False
+    
+    similarity = intersection / union
+    
+    contains_original = original_lower in variant_lower or variant_lower in original_lower
+    
+    return similarity > threshold or contains_original
+    # return variant == original
+
+def generate_variants(message: str, target_variants: int = 3):
+    """
+    Generate message variants that are different from the original message.
+    
+    Args:
+        message (str): The original message to generate variants for
+        max_attempts (int): Maximum number of generation attempts
+        target_variants (int): Number of variants to generate (default: 3)
         
-        if hasattr(response, "text"):
-            variants = [msg.strip() for msg in response.text.split("---") if msg.strip()]
-            if len(variants) > 3:
-                variants = variants[:3]
-            elif len(variants) < 3:
-                while len(variants) < 3:
-                    variants.append(f"\n{message}")
+    Returns:
+        list: List of unique message variants
+    """
+    variants = []
+    
+    while len(variants) < target_variants:
+        try:
+            generation_prompt = test_prompt + "\n\nGenerate exactly 1 completely unique and optimized message that is SUBSTANTIALLY DIFFERENT from the original message below. Use different wording, structure, and approach. Do not repeat or closely paraphrase the original message.\n\nOriginal message: " + message
             
-            print(f"Generating variants...")
-            return variants
-        else:
-            print("No text in response")
-    except Exception as e:
-        print(f"Error generating variants: {e}")
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=generation_prompt
+            )
+            
+            if hasattr(response, "text") and response.text.strip():
+                variant = response.text.strip()
+                
+                if (not is_too_similar(variant, message) and 
+                    not any(is_too_similar(variant, existing) for existing in variants)):
+                    variants.append(variant)
+                
+        except Exception as e:
+            time.sleep(1) # seemless workaround for gemini quota limitation
+            
+    return variants
 
 initial_state = ConversationState(message=user_input)
 
@@ -69,11 +106,22 @@ try:
     )
 
     print("\n<ALL MESSAGES>")
-    sorted_messages = sorted(all_messages, 
-                            key=lambda x: (x['message'] == best_message, x['final_score']),
-                            reverse=True)
     
-    display_messages = sorted_messages[:3]
+    best_message_obj = None
+    other_messages = []
+    
+    for msg_obj in all_messages:
+        if msg_obj['message'] == best_message:
+            best_message_obj = msg_obj
+        else:
+            other_messages.append(msg_obj)
+    
+    sorted_other_messages = sorted(other_messages, 
+                                  key=lambda x: x['final_score'],
+                                  reverse=True)
+    
+    display_messages = [best_message_obj] if best_message_obj else []
+    display_messages.extend(sorted_other_messages[:2 if best_message_obj else 3])
     
     for i, message_obj in enumerate(display_messages, 1):
         is_best = message_obj['message'] == best_message

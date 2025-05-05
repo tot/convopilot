@@ -19,9 +19,9 @@ Your Task:
 4. Return a message that maximizes the likelihood of the desired outcome
 
 Output format:
-- Only output the optimized message
-- Do not include any other text
-- Do not change the format of the message, just improve the message and make it more effective
+- ONLY output the optimized message(s) WITHOUT any other text
+- DO NOT include any other text that is not part of the improved message
+- DO NOT change the format of the message, just improve the message and make it more effective
 
 Remember to consider:
 - Following the format of <MESSAGE_TYPE> exactly (if there is no specified <MESSAGE_TYPE> default to email format)
