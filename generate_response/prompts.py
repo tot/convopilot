@@ -19,7 +19,7 @@ Output format:
 - Do not change the format of the message, just improve the message and make it more effective
 
 Remember to consider:
-- Formating the message the way the user requests
+- Following the format of <MESSAGE_TYPE> exactly (if there is no specified <MESSAGE_TYPE> default to email format)
 - The receiving party's context and background
 - Previous conversation dynamics
 - The specific goal's requirements
