@@ -15,9 +15,9 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 user_context = "I am a 20 year old college student who is trying to get a job at Apple as a software engineer intern. I am using cold outreach to a recruiter to schedule an interview for a job at a tech company."
 message_type = "DM on linkedin"
-past_messages = ""
+past_messages = "Me: Hi James, I'm a 20-year-old college student with a strong interest in software engineering, and I'm eager to learn more about internship opportunities at Apple. Would you be open to a brief call to discuss my qualifications and potential openings? What time works best for you? James: Hi Aaron, nice to meet you. Could you tell me a little more about yourself and any questions you had for me?"
 goal = "I want to schedule an interview with the recruiter for an internship at Apple."
-user_input = "hi, I would like to schedule an interview at your company. What is your availability?"
+user_input = "I have made a trading bot with machine learning and I want to know more about your position as a backend software developer at Apple."
 
 test_prompt = system_prompt + generate_context_prompt(context=user_context) + generate_message_type_prompt(message_type=message_type) + generate_past_messages_prompt(past_messages=past_messages) + generate_goal_prompt(goal=goal) + generate_user_prompt(user_input=user_input)
 
