@@ -19,6 +19,7 @@ Output format:
 - Do not change the format of the message, just improve the message and make it more effective
 
 Remember to consider:
+- Formating the message the way the user requests
 - The receiving party's context and background
 - Previous conversation dynamics
 - The specific goal's requirements
@@ -30,6 +31,12 @@ def generate_context_prompt(context: str) -> str:
     return f"""\n<CONTEXT>
 {context}
 </CONTEXT>\n
+"""
+
+def generate_message_type_prompt(message_type: str) -> str:
+    return f"""\n<MESSAGE_ TYPE>
+{message_type}
+</MESSAGE_TYPE>\n
 """
 
 def generate_past_messages_prompt(past_messages: str) -> str:
