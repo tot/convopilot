@@ -1,6 +1,7 @@
 import random
 import math
 from textblob import TextBlob
+from tqdm import tqdm
 
 class ConversationState:
     def __init__(self, message, history=None, score=None):
@@ -86,7 +87,7 @@ def mcts_search(initial_state, generate_variants_fn, evaluate_fn, iterations=10,
     """Run MCTS algorithm to find the best message variant"""
     root = MCTSNode(initial_state)
     
-    for i in range(iterations):
+    for i in tqdm(range(iterations), desc="Generating messages..."):
         # Selection: Find the most promising node to expand
         node = selection(root)
         

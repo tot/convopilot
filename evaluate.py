@@ -14,7 +14,7 @@ def evaluate_multiple_responses(responses_text):
     
     results = []
     for idx, msg in enumerate(messages, 1):
-        result = evaluate_response_with_textblob(msg)
+        result = score_message(message=msg)
         result["message"] = msg
         result["message_id"] = idx
         results.append(result)

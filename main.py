@@ -16,10 +16,10 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 user_context = "I am a 20 year old college student who is trying to get a job at Apple as a software engineer intern. I am using cold outreach to a recruiter to schedule an interview for a job at a tech company."
-message_type = "Email thread reply"
-past_messages = "Me: Hi James, I'm a 20-year-old college student with a strong interest in software engineering, and I'm eager to learn more about internship opportunities at Apple. Would you be open to a brief call to discuss my qualifications and potential openings? What time works best for you? James: Hi Aaron, nice to meet you. Could you tell me a little more about yourself and any questions you had for me?"
+message_type = "Email thread"
+past_messages = "Me: Subject: Software Engineer Intern Inquiry - John Doe Dear James, I am writing to express my interest in software engineering internship opportunities at Apple. As a third-year computer science student at the University of Virginia, I have been following Apple's work in the development of the Swift programming language and its integration with innovative technologies like SwiftUI with great interest. I would appreciate the opportunity to discuss how my skills and experiences align with Apple's internship needs. Would you be available for a brief conversation sometime next week? Thank you for considering my request. Sincerely, John Doe James: Subject: Re: Software Engineer Intern Inquiry - John Doe Hi John, Thank you for reaching out and for your interest in a software engineering internship at Apple. I'm glad to hear that you're following our work with Swift and SwiftUI. Your background as a computer science student at UVA sounds promising. I'd be happy to learn more about your experience and the specific areas of software engineering you're most passionate about. Could you share a bit more about the projects you've worked on, any relevant technical skills you’ve developed, and what you're hoping to gain from an internship at Apple? Looking forward to hearing more from you. Best, James"
 goal = "I want to schedule an interview with the recruiter for an internship at Apple."
-user_input = "I have made a trading bot with machine learning and I want to know more about your position as a backend software developer at Apple."
+user_input = "I have an extensive background in machine learning and AI with my many projects such as a ML based trading bot. I am looking to gain valuable backened development experience from an internship at Apple."
 
 test_prompt = system_prompt + generate_context_prompt(context=user_context) + generate_message_type_prompt(message_type=message_type) + generate_past_messages_prompt(past_messages=past_messages) + generate_goal_prompt(goal=goal) + generate_user_prompt(user_input=user_input)
 
@@ -75,7 +75,7 @@ def generate_variants(message: str, target_variants: int = 3):
     
     while len(variants) < target_variants:
         try:
-            generation_prompt = test_prompt + "\n\nGenerate exactly 1 completely unique and optimized message that is SUBSTANTIALLY DIFFERENT from the original message below. Use different wording, structure, and approach. Do not repeat or closely paraphrase the original message.\n\nOriginal message: " + message
+            generation_prompt = test_prompt + "\n\nGenerate exactly 1 completely unique and optimized message in the correct <MESSAGE_ TYPE> that is SUBSTANTIALLY DIFFERENT from the original message below. Use different wording, structure, and approach. Do not repeat or closely paraphrase the original message.\n\nOriginal message: " + message
             
             response = client.models.generate_content(
                 model="gemini-2.0-flash",
@@ -97,7 +97,6 @@ def generate_variants(message: str, target_variants: int = 3):
 initial_state = ConversationState(message=user_input)
 
 try:
-    print("Starting MCTS search...")
     best_message, all_messages = mcts_search(
         initial_state=initial_state,
         generate_variants_fn=generate_variants,
@@ -148,20 +147,20 @@ except Exception as e:
 """
 Commented out code used for data gathering
 """
-# csv_file_path = "mcts_scores.csv"
-# csv_headers = ["message", "score", "MCTS score", "visits"]
+csv_file_path = "mcts_scores.csv"
+csv_headers = ["message", "score", "MCTS score", "visits"]
 
-# file_exists = os.path.isfile(csv_file_path)
-# with open(csv_file_path, mode='a', newline='', encoding='utf-8') as csvfile:
-#     writer = csv.DictWriter(csvfile, fieldnames=csv_headers)
+file_exists = os.path.isfile(csv_file_path)
+with open(csv_file_path, mode='a', newline='', encoding='utf-8') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=csv_headers)
     
-#     if not file_exists:
-#         writer.writeheader()
+    if not file_exists:
+        writer.writeheader()
     
-#     if best_message_obj:
-#         writer.writerow({
-#             "message": best_message_obj['message'],
-#             "score": round(best_message_obj['final_score'], 4),
-#             "MCTS score": round(best_message_obj['value'], 4),
-#             "visits": best_message_obj['visits']
-#         })
+    if best_message_obj:
+        writer.writerow({
+            "message": best_message_obj['message'],
+            "score": round(best_message_obj['final_score'], 4),
+            "MCTS score": round(best_message_obj['value'], 4),
+            "visits": best_message_obj['visits']
+        })
