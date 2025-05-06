@@ -1,10 +1,11 @@
 import os
+import csv
 import time
 from mcts import mcts_search, ConversationState
 from dotenv import load_dotenv
 from google import genai
 from generate_response.prompts import system_prompt, generate_context_prompt, generate_past_messages_prompt, generate_goal_prompt, generate_user_prompt, generate_response_prompt, generate_message_type_prompt
-from evaluate import score_message_only
+from evaluate import score_message
 
 load_dotenv()
 
@@ -15,7 +16,7 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 user_context = "I am a 20 year old college student who is trying to get a job at Apple as a software engineer intern. I am using cold outreach to a recruiter to schedule an interview for a job at a tech company."
-message_type = "DM on linkedin"
+message_type = "Email thread reply"
 past_messages = "Me: Hi James, I'm a 20-year-old college student with a strong interest in software engineering, and I'm eager to learn more about internship opportunities at Apple. Would you be open to a brief call to discuss my qualifications and potential openings? What time works best for you? James: Hi Aaron, nice to meet you. Could you tell me a little more about yourself and any questions you had for me?"
 goal = "I want to schedule an interview with the recruiter for an internship at Apple."
 user_input = "I have made a trading bot with machine learning and I want to know more about your position as a backend software developer at Apple."
@@ -100,7 +101,7 @@ try:
     best_message, all_messages = mcts_search(
         initial_state=initial_state,
         generate_variants_fn=generate_variants,
-        evaluate_fn=score_message_only,
+        evaluate_fn=score_message,
         iterations=15,
         return_all=True
     )
@@ -143,3 +144,24 @@ except Exception as e:
     print(f"Error during MCTS search: {e}")
     import traceback
     traceback.print_exc()
+
+"""
+Commented out code used for data gathering
+"""
+# csv_file_path = "mcts_scores.csv"
+# csv_headers = ["message", "score", "MCTS score", "visits"]
+
+# file_exists = os.path.isfile(csv_file_path)
+# with open(csv_file_path, mode='a', newline='', encoding='utf-8') as csvfile:
+#     writer = csv.DictWriter(csvfile, fieldnames=csv_headers)
+    
+#     if not file_exists:
+#         writer.writeheader()
+    
+#     if best_message_obj:
+#         writer.writerow({
+#             "message": best_message_obj['message'],
+#             "score": round(best_message_obj['final_score'], 4),
+#             "MCTS score": round(best_message_obj['value'], 4),
+#             "visits": best_message_obj['visits']
+#         })

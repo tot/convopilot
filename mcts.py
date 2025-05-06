@@ -1,7 +1,6 @@
 import random
 import math
 from textblob import TextBlob
-from evaluate import evaluate_response_with_textblob
 
 class ConversationState:
     def __init__(self, message, history=None, score=None):
